@@ -1,0 +1,23 @@
+{
+  "app_id": "wx1f2eb0abac2cea04",
+  "app_secret": "9e2339642a8c337692344e31fa9d2d43",
+  "token": "teamun",
+  "menu": {
+    "button": [{
+      "type": "click",
+      "name": "把球给我",
+      "key": "V1001_TODAY_MUSIC"
+    }, {
+      "name": "我的",
+      "sub_button": [{
+        "type": "view",
+        "name": "NBA",
+        "url": "http://nba.hupu.com/"
+      }, {
+        "type": "click",
+        "name": "Very尿性",
+        "key": "V1001_GOOD"
+      }]
+    }]
+  }
+}
