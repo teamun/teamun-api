@@ -5,7 +5,6 @@
  */
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var crypto = require('crypto');
 
 /**
  * 运动员等级

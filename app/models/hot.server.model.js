@@ -5,7 +5,6 @@
  */
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var crypto = require('crypto');
 
 /**
  * 热门
@@ -13,7 +12,12 @@ var crypto = require('crypto');
  * poster: 海报
  * url: url
  * activityId: 活动ID
- * category: app or site
+ * type: app or site
+ * category:  
+    0: '活动',
+    1: '资讯',
+    2: '招募',
+    3: '外链'
  */
 var HotSchema = new Schema({
   title: {

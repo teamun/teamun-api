@@ -5,7 +5,6 @@
  */
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var crypto = require('crypto');
 
 /**
  * 管理后台菜单

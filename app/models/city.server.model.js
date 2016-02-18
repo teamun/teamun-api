@@ -5,7 +5,6 @@
  */
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var crypto = require('crypto');
 
 /**
  * City 全国城市

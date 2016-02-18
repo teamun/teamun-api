@@ -6,7 +6,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var deepPopulate = require('mongoose-deep-populate')(mongoose);
-var crypto = require('crypto');
 
 /**
  * 活动

@@ -262,7 +262,7 @@ exports.listForMobile = function(req, res) {
   req.headers.range = utilsValidation.getRange(req.query.page);
   req.headers['range-unit'] = 'items';
   var hasmore = true;
-  var flag = '1'; //1: startTime 大于当天时间的活动 2: startTime 小于当天时间的活动
+  var flag = '1'; //1: startTime 大于当天时间的活动 2: startTime 小于当天时间的活动(历史活动)
   
   var date = new Date();
   date.setHours(0);
