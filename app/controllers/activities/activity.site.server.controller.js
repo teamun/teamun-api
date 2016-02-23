@@ -219,17 +219,21 @@ exports.findOneForSite = function(req, res) {
         msg: errorHandler.getErrorMessage(err)
       });
     } else {
-      if(req.user) {
+      
+      for (var i = 0; i < activity.activityGroups.length; i++) {
         //判断当前用户是否加入该活动任意分组，如果已加入标识: isJoin = true
-        for (var i = 0; i < activity.activityGroups.length; i++) {
+        if(req.user) {
           if(activity.activityGroups[i].users.indexOf(req.user._id) >= 0) {
             activity.activityGroups[i].isJoin = true;
           } else {
             activity.activityGroups[i].isJoin = false;
           };
-          activity.membersCount += activity.activityGroups[i].users.length;
-        }; 
-      }
+        }
+        
+        //计算活动各个分组总报名人数 
+        activity.membersCount += activity.activityGroups[i].users.length;
+      }; 
+
       //判断任何分组中有任意一组报名时间小于当前时间，并且分组状态为0: 未开始, 活动状态为0: 待发布，如果条件符合则更新该分组状态为 1: 报名中
       var isSignTime = false;
       for (var i = 0; i < activity.activityGroups.length; i++) {
