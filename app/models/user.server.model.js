@@ -38,7 +38,7 @@ var validateLocalStrategyPassword = function(password) {
  * height: 身高
  * weight: 体重
  * isSafe: 是否已保险
- * points: 
+ * points:
  * password: 密码
  * salt: 盐
  * roles: 角色
@@ -226,7 +226,7 @@ UserSchema.pre('save', function(next) {
     this.meta.updateAt = Date.now();
   }
   if (this.isModified('password')) {
-    if (this.password && this.password.length > 6) {
+    if (this.password && this.password.length >＝ 6) {
       this.salt = new Buffer(crypto.randomBytes(16).toString('base64'), 'base64');
       this.password = this.hashPassword(this.password);
     }

@@ -52,7 +52,7 @@ exports.membersForMobile = function(req, res) {
             members.realname = groups[i].users[j].realname;
             members.idcard = groups[i].users[j].idcard;
             members.isSafe = groups[i].users[j].isSafe;
-            
+
             members.groupId = groups[i]._id;
             members.groupName = groups[i].name;
             members.activityId = req.params.activityID;
