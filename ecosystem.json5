@@ -46,24 +46,13 @@
     //   path : "/var/www/production",
     //   "post-deploy" : "pm2 startOrRestart ecosystem.json5 --env production"
     // },
-    pre : {
-      user : "root",
-      host : "192.168.1.200",
-      ref  : "origin/master",
-      repo : "https://github.com/teamun/teamun-api.git",
-      path : "/data/api/teamun-api",
-      "post-deploy" : "npm install",
-      env  : {
-        NODE_ENV: "development"
-      }
-    },
     dev : {
       user : "root",
       host : "192.168.1.200",
       ref  : "origin/master",
       repo : "https://github.com/teamun/teamun-api.git",
       path : "/data/api/teamun-api",
-      "post-deploy" : "./node_modules/pm2/bin/pm2 startOrRestart ecosystem.json5 -i max --env production",
+      "post-deploy" : "npm install && ./node_modules/pm2/bin/pm2 startOrRestart ecosystem.json5 -i max --env production",
       env  : {
         NODE_ENV: "development"
       }
