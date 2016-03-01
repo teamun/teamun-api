@@ -16,10 +16,11 @@
       name      : "server",
       script    : "server.js",
       exec_mode : "cluster",
+      instance  : 4,
       env: {
         COMMON_VARIABLE: "true"
       },
-      env_production : {
+      env_development : {
         NODE_ENV: "development"
       }
     },
@@ -52,8 +53,8 @@
       host : "192.168.1.200",
       ref  : "origin/master",
       repo : "https://github.com/teamun/teamun-api.git",
-      path : "/data/api/teamun-api",
-      "post-deploy" : "npm install && ./node_modules/pm2/bin/pm2 startOrRestart ecosystem.json5 --env production",
+      path : "/data/api",
+      "post-deploy" : "npm install && pm2 startOrRestart ecosystem.json5 --env development",
       env  : {
         NODE_ENV: "development"
       }
