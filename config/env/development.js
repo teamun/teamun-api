@@ -2,7 +2,7 @@
 
 module.exports = {
   secret: '123together',
-  db: 'mongodb://teamun:duibu2015@http://localhost:12345/teamun-test',
+  db: 'mongodb://teamun:duibu2015@localhost:12345/teamun-test',
   port: 3001,
   app: {
     title: 'teamun-api',
