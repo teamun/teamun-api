@@ -9,26 +9,27 @@
    * https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#json-app-declaration
    *
    */
-  apps : [
+  "apps": [
 
     // First application
     {
-      name      : "server",
-      script    : "server.js",
-      exec_mode : "cluster",
-      instance  : 4,
-      env: {
-        COMMON_VARIABLE: "true"
+      "name": "server",
+      "script": "server.js",
+      "exec_mode": "cluster",
+      "log_date_format": "YYYY-MM-DD HH:mm:ss",
+      "instances": 4,
+      "env": {
+        "COMMON_VARIABLE": "true"
       },
-      env_development : {
-        NODE_ENV: "development"
+      "env_development": {
+        "NODE_ENV": "development"
       }
     },
 
     // Second application
     // {
-    //   name      : "WEB",
-    //   script    : "web.js"
+    //   "name"      : "WEB",
+    //   "script"    : "web.js"
     // }
 
   ],
@@ -39,7 +40,7 @@
    * For more help go to :
    * https://github.com/Unitech/PM2/blob/master/ADVANCED_README.md#deployment-pm2--090
    */
-  deploy : {
+  "deploy": {
     // production : {
     //   user : "node",
     //   host : "212.83.163.1",
@@ -48,15 +49,15 @@
     //   path : "/var/www/production",
     //   "post-deploy" : "pm2 startOrRestart ecosystem.json5 --env production"
     // },
-    dev : {
-      user : "root",
-      host : "192.168.1.200",
-      ref  : "origin/master",
-      repo : "https://github.com/teamun/teamun-api.git",
-      path : "/data/api",
-      "post-deploy" : "npm install && pm2 startOrRestart ecosystem.json5 --env development",
-      env  : {
-        NODE_ENV: "development"
+    "dev": {
+      "user": "root",
+      "host": "192.168.1.200",
+      "ref": "origin/master",
+      "repo": "https://github.com/teamun/teamun-api.git",
+      "path": "/data/api",
+      "post-deploy": "npm install && pm2 startOrRestart ecosystem.json --env development",
+      "env": {
+        "NODE_ENV": "development"
       }
     }
   }
