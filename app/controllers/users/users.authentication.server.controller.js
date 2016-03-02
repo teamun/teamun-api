@@ -222,6 +222,7 @@ exports.authenticate = function(req, res, next) {
             message: err
           });
         } else {
+          var expires = moment().add('days', 100).valueOf();
 
           User.findOne(user._id)
             .populate('events', 'name')
@@ -245,7 +246,6 @@ exports.authenticate = function(req, res, next) {
               }
             });
 
-          //var expires = moment().add('days', 100).valueOf();
           /*var token = jwt.encode({
             iss: user.mobile,
             exp: expires
