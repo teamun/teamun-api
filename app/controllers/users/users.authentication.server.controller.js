@@ -81,7 +81,7 @@ exports.sendsmscode = function(req, res) {
                 return res.json({
                   ret: 1,
                   msg: ErrorCode.SUCCESS.desc,
-                  data: code
+                  data: ''
                 });
               }
             });
@@ -263,7 +263,7 @@ exports.authenticate = function(req, res, next) {
                       expires: expires,
                       token: token
                     }
-                  }); 
+                  });
                 }
               });
             }
@@ -436,7 +436,7 @@ exports.signup = function(req, res, next) {
                                           expires: expires,
                                           token: token
                                         }
-                                      }); 
+                                      });
                                     }
                                   });
                                 }
