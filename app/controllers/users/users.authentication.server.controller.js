@@ -222,7 +222,7 @@ exports.authenticate = function(req, res, next) {
             message: err
           });
         } else {
-          var expires = moment().add('days', 100).valueOf();
+          //var expires = moment().add('days', 100).valueOf();
 
           User.findOne(user._id)
             .populate('events', 'name')
@@ -239,8 +239,8 @@ exports.authenticate = function(req, res, next) {
                   msg: ErrorCode.SUCCESS.desc,
                   data: {
                     user: user,
-                    expires: expires,
-                    token: token
+                    //expires: expires,
+                    //token: token
                   }
                 });
               }
