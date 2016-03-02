@@ -223,13 +223,35 @@ exports.authenticate = function(req, res, next) {
           });
         } else {
 
-          var expires = moment().add('days', 100).valueOf();
-          var token = jwt.encode({
+          User.findOne(user._id)
+            .populate('events', 'name')
+            .exec(function(err, user) {
+              if (err) {
+                return res.json({
+                  ret: -1,
+                  code: ErrorCode.DATABASE_ERROR.code,
+                  msg: errorHandler.getErrorMessage(err)
+                });
+              } else {
+                return res.json({
+                  ret: 1,
+                  msg: ErrorCode.SUCCESS.desc,
+                  data: {
+                    user: user,
+                    expires: expires,
+                    token: token
+                  }
+                });
+              }
+            });
+
+          //var expires = moment().add('days', 100).valueOf();
+          /*var token = jwt.encode({
             iss: user.mobile,
             exp: expires
-          }, config.secret);
+          }, config.secret);*/
 
-          User.update({
+          /*User.update({
             mobile: user.mobile
           }, {
             $set: {
@@ -267,7 +289,7 @@ exports.authenticate = function(req, res, next) {
                 }
               });
             }
-          });
+          });*/
         }
       });
     }
@@ -419,26 +441,26 @@ exports.signup = function(req, res, next) {
                                   });
                                 } else {
                                   User.findOne(user._id)
-                                  .populate('events', 'name')
-                                  .exec(function(err, user) {
-                                    if (err) {
-                                      return res.json({
-                                        ret: -1,
-                                        code: ErrorCode.DATABASE_ERROR.code,
-                                        msg: errorHandler.getErrorMessage(err)
-                                      });
-                                    } else {
-                                      return res.json({
-                                        ret: 1,
-                                        msg: ErrorCode.SUCCESS.desc,
-                                        data: {
-                                          user: user,
-                                          expires: expires,
-                                          token: token
-                                        }
-                                      });
-                                    }
-                                  });
+                                    .populate('events', 'name')
+                                    .exec(function(err, user) {
+                                      if (err) {
+                                        return res.json({
+                                          ret: -1,
+                                          code: ErrorCode.DATABASE_ERROR.code,
+                                          msg: errorHandler.getErrorMessage(err)
+                                        });
+                                      } else {
+                                        return res.json({
+                                          ret: 1,
+                                          msg: ErrorCode.SUCCESS.desc,
+                                          data: {
+                                            user: user,
+                                            expires: expires,
+                                            token: token
+                                          }
+                                        });
+                                      }
+                                    });
                                 }
                               });
                               //更新短信验证码状态为已使用
