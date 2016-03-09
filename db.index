@@ -1,0 +1,2 @@
+//给活动分组订单添加索引
+db.activitygrouporder.ensureIndex({"groupId":1,"status":1,"meta.createAt":1})

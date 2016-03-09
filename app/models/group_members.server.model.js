@@ -63,7 +63,27 @@ var GroupMembersSchema = new Schema({
     type: String,
     trim: true,
     default: ''
+  },
+  meta: {
+    createAt: {
+      type: Date,
+      default: Date.now()
+    },
+    updateAt: {
+      type: Date,
+      default: Date.now()
+    }
   }
+})
+
+GroupMembersSchema.pre('save', function(next) {
+  if (this.isNew) {
+    this.meta.createAt = this.meta.updateAt = Date.now();
+  } else {
+    this.meta.updateAt = Date.now();
+  }
+
+  next();
 })
 
 module.exports = mongoose.model('GroupMembers', GroupMembersSchema);

@@ -56,7 +56,7 @@ exports.createForSite = function(req, res) {
                 data: {
                   activityGroup: activityGroup
                 }
-              }); 
+              });
             }
           });
         }
@@ -67,8 +67,8 @@ exports.createForSite = function(req, res) {
 
 
 exports.findOneForSite = function(req, res) {
-  ActivityGroup.find({activity: req.params.activityID})
-    .sort({'meta.createAt': -1})
+  ActivityGroup.find({ activity: req.params.activityID })
+    .sort({ 'meta.createAt': -1 })
     .exec(function(err, activityGroups) {
       if (err) {
         return res.json({
@@ -147,7 +147,7 @@ exports.deleteForSite = function(req, res) {
           var group_array = [];
           group_array = activity.activityGroups;
           for (var i = 0; i < group_array.length; i++) {
-            if(group_array[i].toString() == activityGroup._id.toString()) {
+            if (group_array[i].toString() == activityGroup._id.toString()) {
               group_array.splice(group_array.indexOf(group_array[i]), 1);
             }
           };
@@ -178,7 +178,7 @@ exports.deleteForSite = function(req, res) {
 
 exports.joinForSite = function(req, res) {
   var activityGroup = req.activityGroup;
-  if(activityGroup.users.indexOf(req.user._id) >= 0) {
+  if (activityGroup.users.indexOf(req.user._id) >= 0) {
     return res.json({
       ret: -1,
       code: ErrorCode.ACTIVITY_GROUP_ALREADY_JOINED.code,
@@ -186,7 +186,7 @@ exports.joinForSite = function(req, res) {
     });
   } else {
     //如果活动分组状态为已结束则返回结束状态
-    if(!activityGroup.status === ActivityGroupStatus.statusCode.ACTIVITY_GROUP_SIGN_UP_CLOSE.code) {
+    if (!activityGroup.status === ActivityGroupStatus.statusCode.ACTIVITY_GROUP_SIGN_UP_CLOSE.code) {
       return res.json({
         ret: -1,
         code: ErrorCode.ACTIVITY_GROUP_SIGN_UP_CLOSE.code,
@@ -194,7 +194,7 @@ exports.joinForSite = function(req, res) {
       });
     } else {
       //如果当前时间大于报名截至时间则更新活动状态为: 3 - 已结束
-      if(new Date() > activityGroup.deadlineTime) {
+      if (new Date() > activityGroup.deadlineTime) {
         ActivityGroup.update({
           _id: activityGroup._id
         }, {
@@ -218,11 +218,12 @@ exports.joinForSite = function(req, res) {
         });
       } else {
         //如果当前分组状态为报名中才可以报名
-        if(activityGroup.status === ActivityGroupStatus.statusCode.ACTIVITY_GROUP_SIGN_UP_ING.code) {
+        if (activityGroup.status === ActivityGroupStatus.statusCode.ACTIVITY_GROUP_SIGN_UP_ING.code) {
 
           //判断该分组报名人数是否已达上限 或者 numLimit ＝ 0 则为不限制人数
-          if(activityGroup.users.length < activityGroup.numLimit || activityGroup.numLimit == 0) {
+          if (activityGroup.users.length < activityGroup.numLimit || activityGroup.numLimit == 0) {
             activityGroup.users.push(req.user._id);
+            console.log('activityGroup __v' + activityGroup.__v);
             activityGroup.save(function(err) {
               if (err) {
                 return res.json({
@@ -231,37 +232,37 @@ exports.joinForSite = function(req, res) {
                   msg: errorHandler.getErrorMessage(err)
                 });
               } else {
+                console.log('activityGroup __v' + activityGroup.__v);
                 //加入活动发出通知逻辑(发送给自己)
                 NotificationComponent.sendJoinActivityNotificationToSelf(req, res, activityGroup, req.user);
                 //加入活动发出通知逻辑(发送给活动领队)
                 NotificationComponent.sendJoinActivityNotificationToCaptain(req, res, activityGroup, req.user);
 
-                return res.json({
-                  ret: 1,
-                  code: ErrorCode.SUCCESS.code,
-                  msg: ErrorCode.SUCCESS.desc,
+                //更新与自己相关的活动
+                req.user.activities.push(activityGroup.activity);
+                User.update({
+                  _id: req.user._id
+                }, {
+                  $set: {
+                    activities: req.user.activities
+                  }
+                }, function(err) {
+                  if (err) {
+                    return res.json({
+                      ret: -1,
+                      code: ErrorCode.DATABASE_ERROR.code,
+                      msg: errorHandler.getErrorMessage(err)
+                    });
+                  };
+
+                  return res.json({
+                    ret: 1,
+                    code: ErrorCode.SUCCESS.code,
+                    msg: ErrorCode.SUCCESS.desc,
+                  });
                 });
               }
             });
-
-            //更新与自己相关的活动
-            req.user.activities.push(activityGroup.activity);
-            User.update({
-              _id: req.user._id
-            }, {
-              $set: {
-                activities: req.user.activities
-              }
-            }, function(err) {
-              if (err) {
-                return res.json({
-                  ret: -1,
-                  code: ErrorCode.DATABASE_ERROR.code,
-                  msg: errorHandler.getErrorMessage(err)
-                });
-              };
-            });
-
           } else {
             //更新报名人数已满
             ActivityGroup.update({
@@ -301,7 +302,7 @@ exports.joinForSite = function(req, res) {
 
 exports.quitForSite = function(req, res) {
   var activityGroup = req.activityGroup;
-  if(activityGroup.users.indexOf(req.user._id) >= 0) {
+  if (activityGroup.users.indexOf(req.user._id) >= 0) {
     activityGroup.users = activityGroup.users.splice(activityGroup.users, activityGroup.users.indexOf(req.user._id));
     activityGroup.save(function(err) {
       if (err) {
@@ -320,7 +321,7 @@ exports.quitForSite = function(req, res) {
     });
 
     //更新与自己相关的活动
-    if(req.user.activities.indexOf(activityGroup.activity) >= 0) {
+    if (req.user.activities.indexOf(activityGroup.activity) >= 0) {
       req.user.activities = req.user.activities.splice(req.user.activities, req.user.activities.indexOf(activityGroup.activity));
       User.update({
         _id: req.user._id
@@ -350,53 +351,53 @@ exports.quitForSite = function(req, res) {
 
 exports.membersForSite = function(req, res) {
 
-  ActivityGroup.find({activity: req.params.activityID}, 'name users')
-  .populate('users', 'nickname avatar mobile realname idcard isSafe')
-  .exec(function(err, groups){
+  ActivityGroup.find({ activity: req.params.activityID }, 'name users')
+    .populate('users', 'nickname avatar mobile realname idcard isSafe')
+    .exec(function(err, groups) {
 
-    var member_array = [];
-    Activity.findOne({_id: req.params.activityID}, 'captain')
-    .populate('captain', 'nickname avatar mobile realname idcard isSafe')
-    .exec(function(err, activity){
+      var member_array = [];
+      Activity.findOne({ _id: req.params.activityID }, 'captain')
+        .populate('captain', 'nickname avatar mobile realname idcard isSafe')
+        .exec(function(err, activity) {
 
-      //创建成员实体模板
-      var captain = new GroupMembers();
-      captain.userId = activity.captain._id;
-      captain.mobile = activity.captain.mobile;
-      captain.nickname = activity.captain.nickname;
-      captain.avatar = activity.captain.avatar;
-      captain.realname = activity.captain.realname;
-      captain.idcard = activity.captain.idcard;
-      captain.isSafe = activity.captain.isSafe;
-      captain.activityId = req.params.activityID;
-      member_array.push(captain);
-      var captainId = activity.captain._id;
+          //创建成员实体模板
+          var captain = new GroupMembers();
+          captain.userId = activity.captain._id;
+          captain.mobile = activity.captain.mobile;
+          captain.nickname = activity.captain.nickname;
+          captain.avatar = activity.captain.avatar;
+          captain.realname = activity.captain.realname;
+          captain.idcard = activity.captain.idcard;
+          captain.isSafe = activity.captain.isSafe;
+          captain.activityId = req.params.activityID;
+          member_array.push(captain);
+          var captainId = activity.captain._id;
 
-      //拼装成员列表结构
-      for (var i = 0; i < groups.length; i++) {
-        for (var j = 0; j < groups[i].users.length; j++) {
-          if(!_.isEqual(captainId, groups[i].users[j]._id)) {
-            var members = new GroupMembers();
-            members.userId = groups[i].users[j]._id;
-            members.mobile = groups[i].users[j].mobile;
-            members.nickname = groups[i].users[j].nickname;
-            members.avatar = groups[i].users[j].avatar;
-            members.realname = groups[i].users[j].realname;
-            members.idcard = groups[i].users[j].idcard;
-            members.isSafe = groups[i].users[j].isSafe;
-            
-            members.groupId = groups[i]._id;
-            members.groupName = groups[i].name;
-            members.activityId = req.params.activityID;
-            member_array.push(members);
-          }
-        };
-      };
-      res.json({
-        ret: 1,
-        msf: ErrorCode.SUCCESS.msg,
-        data: member_array
-      });
+          //拼装成员列表结构
+          for (var i = 0; i < groups.length; i++) {
+            for (var j = 0; j < groups[i].users.length; j++) {
+              if (!_.isEqual(captainId, groups[i].users[j]._id)) {
+                var members = new GroupMembers();
+                members.userId = groups[i].users[j]._id;
+                members.mobile = groups[i].users[j].mobile;
+                members.nickname = groups[i].users[j].nickname;
+                members.avatar = groups[i].users[j].avatar;
+                members.realname = groups[i].users[j].realname;
+                members.idcard = groups[i].users[j].idcard;
+                members.isSafe = groups[i].users[j].isSafe;
+
+                members.groupId = groups[i]._id;
+                members.groupName = groups[i].name;
+                members.activityId = req.params.activityID;
+                member_array.push(members);
+              }
+            };
+          };
+          res.json({
+            ret: 1,
+            msf: ErrorCode.SUCCESS.msg,
+            data: member_array
+          });
+        });
     });
-  });
 };

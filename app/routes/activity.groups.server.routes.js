@@ -7,13 +7,12 @@ var activityGroups = require('../controllers/activity.groups.server.controller')
 var config = require('../../config/config');
 
 module.exports = function(app) {
-  
+
   /*------------------------------------------  activity-groups mobile routes  -----------------------------------------------*/
   app.route(config.app.restApiRoot + '/activity-groups/join/:activityGroupID').put(activityGroups.joinForMobile);
   app.route(config.app.restApiRoot + '/activity-groups/quit/:activityGroupID').put(activityGroups.quitForMobile);
   app.route(config.app.restApiRoot + '/activity-groups/kickout/:activityGroupID').put(activityGroups.kickoutForMobile);
   app.route(config.app.restApiRoot + '/activity-groups/members/:activityID').get(activityGroups.membersForMobile);
-
 
   /*------------------------------------------  activity-groups site routes  -----------------------------------------------*/
   app.route(config.app.restApiRoot + '/site/activity-groups/join/:activityGroupID').put(activityGroups.joinForSite);

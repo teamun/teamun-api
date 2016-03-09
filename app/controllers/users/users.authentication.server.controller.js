@@ -19,7 +19,7 @@ var _ = require('lodash'),
 
 // var regx = /^(13|15|17|18|14)[0-9]{9}$/;
 
-var regx = /^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57])[0-9]{8}$/;
+var regx = /^(0|86|17951)?(13[0-9]|15[012356789]|17[0-9]|18[0-9]|14[57])[0-9]{8}$/;
 
 var client = top.createClient({
   appkey: config.alidayu.appkey,
@@ -222,7 +222,7 @@ exports.authenticate = function(req, res, next) {
             message: err
           });
         } else {
-          //var expires = moment().add('days', 100).valueOf();
+          var expires = moment().add(100, 'days').valueOf();
 
           User.findOne(user._id)
             .populate('events', 'name')
@@ -239,57 +239,12 @@ exports.authenticate = function(req, res, next) {
                   msg: ErrorCode.SUCCESS.desc,
                   data: {
                     user: user,
-                    //expires: expires,
-                    //token: token
+                    expires: expires,
+                    token: user.token
                   }
                 });
               }
             });
-
-          /*var token = jwt.encode({
-            iss: user.mobile,
-            exp: expires
-          }, config.secret);*/
-
-          /*User.update({
-            mobile: user.mobile
-          }, {
-            $set: {
-              expires: expires,
-              token: token,
-              'meta.lastLoginAt': new Date()
-            }
-          }, function(err) {
-            if (err) {
-              return res.json({
-                ret: -1,
-                code: ErrorCode.DATABASE_ERROR.code,
-                msg: errorHandler.getErrorMessage(err)
-              });
-            } else {
-              User.findOne(user._id)
-              .populate('events', 'name')
-              .exec(function(err, user) {
-                if (err) {
-                  return res.json({
-                    ret: -1,
-                    code: ErrorCode.DATABASE_ERROR.code,
-                    msg: errorHandler.getErrorMessage(err)
-                  });
-                } else {
-                  return res.json({
-                    ret: 1,
-                    msg: ErrorCode.SUCCESS.desc,
-                    data: {
-                      user: user,
-                      expires: expires,
-                      token: token
-                    }
-                  });
-                }
-              });
-            }
-          });*/
         }
       });
     }

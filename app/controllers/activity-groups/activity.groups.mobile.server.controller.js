@@ -11,69 +11,69 @@ var _ = require('lodash'),
   ActivityGroup = mongoose.model('ActivityGroup'),
   Activity = mongoose.model('Activity'),
   User = mongoose.model('User'),
+  ActivityGroupOrder = mongoose.model('ActivityGroupOrder'),
   GroupMembers = mongoose.model('GroupMembers'),
   NotificationComponent = require('../../components/notifications/notifications.server.component.js');
 
 
 exports.membersForMobile = function(req, res) {
 
-  ActivityGroup.find({activity: req.params.activityID}, 'name users')
-  .populate('users', 'nickname avatar mobile realname idcard isSafe')
-  .exec(function(err, groups){
+  ActivityGroup.find({ activity: req.params.activityID }, 'name users')
+    .populate('users', 'nickname avatar mobile realname idcard isSafe')
+    .exec(function(err, groups) {
 
-    var member_array = [];
-    Activity.findOne({_id: req.params.activityID}, 'captain')
-    .populate('captain', 'nickname avatar mobile realname idcard isSafe')
-    .exec(function(err, activity){
+      var member_array = [];
+      Activity.findOne({ _id: req.params.activityID }, 'captain')
+        .populate('captain', 'nickname avatar mobile realname idcard isSafe')
+        .exec(function(err, activity) {
 
-      //创建成员实体模板
-      var captain = new GroupMembers();
-      captain.userId = activity.captain._id;
-      captain.mobile = activity.captain.mobile;
-      captain.nickname = activity.captain.nickname;
-      captain.avatar = activity.captain.avatar;
-      captain.realname = activity.captain.realname;
-      captain.idcard = activity.captain.idcard;
-      captain.isSafe = activity.captain.isSafe;
-      captain.isCaptain = true;
-      captain.activityId = req.params.activityID;
-      member_array.push(captain);
-      var captainId = activity.captain._id;
+          //创建成员实体模板
+          var captain = new GroupMembers();
+          captain.userId = activity.captain._id;
+          captain.mobile = activity.captain.mobile;
+          captain.nickname = activity.captain.nickname;
+          captain.avatar = activity.captain.avatar;
+          captain.realname = activity.captain.realname;
+          captain.idcard = activity.captain.idcard;
+          captain.isSafe = activity.captain.isSafe;
+          captain.isCaptain = true;
+          captain.activityId = req.params.activityID;
+          member_array.push(captain);
+          var captainId = activity.captain._id;
 
-      //拼装成员列表结构
-      for (var i = 0; i < groups.length; i++) {
-        for (var j = 0; j < groups[i].users.length; j++) {
-          if(!_.isEqual(captainId, groups[i].users[j]._id)) {
-            var members = new GroupMembers();
-            members.userId = groups[i].users[j]._id;
-            members.mobile = groups[i].users[j].mobile;
-            members.nickname = groups[i].users[j].nickname;
-            members.avatar = groups[i].users[j].avatar;
-            members.realname = groups[i].users[j].realname;
-            members.idcard = groups[i].users[j].idcard;
-            members.isSafe = groups[i].users[j].isSafe;
+          //拼装成员列表结构
+          for (var i = 0; i < groups.length; i++) {
+            for (var j = 0; j < groups[i].users.length; j++) {
+              if (!_.isEqual(captainId, groups[i].users[j]._id)) {
+                var members = new GroupMembers();
+                members.userId = groups[i].users[j]._id;
+                members.mobile = groups[i].users[j].mobile;
+                members.nickname = groups[i].users[j].nickname;
+                members.avatar = groups[i].users[j].avatar;
+                members.realname = groups[i].users[j].realname;
+                members.idcard = groups[i].users[j].idcard;
+                members.isSafe = groups[i].users[j].isSafe;
 
-            members.groupId = groups[i]._id;
-            members.groupName = groups[i].name;
-            members.activityId = req.params.activityID;
-            member_array.push(members);
-          }
-        };
-      };
-      res.json({
-        ret: 1,
-        msf: ErrorCode.SUCCESS.msg,
-        data: member_array
-      });
+                members.groupId = groups[i]._id;
+                members.groupName = groups[i].name;
+                members.activityId = req.params.activityID;
+                member_array.push(members);
+              }
+            };
+          };
+          return res.json({
+            ret: 1,
+            msf: ErrorCode.SUCCESS.msg,
+            data: member_array
+          });
+        });
     });
-  });
 };
-
 
 exports.joinForMobile = function(req, res) {
   var activityGroup = req.activityGroup;
   var token = req.body.token || req.query.token || req.headers['x-access-token'] || req.headers['authorization'];
-  if(token) {
+  if (token) {
     //先进行身份验证
     User.findOne({
       token: token
@@ -92,7 +92,7 @@ exports.joinForMobile = function(req, res) {
           msg: ErrorCode.ACCESS_TOKEN_EXPIRED.desc
         });
       };
-      if(activityGroup.users.indexOf(user._id) >= 0) {
+      if (activityGroup.users.indexOf(user._id) >= 0) {
         return res.json({
           ret: -1,
           code: ErrorCode.ACTIVITY_GROUP_ALREADY_JOINED.code,
@@ -100,7 +100,7 @@ exports.joinForMobile = function(req, res) {
         });
       } else {
         //如果活动分组状态为已结束则返回结束状态
-        if(!activityGroup.status == ActivityGroupStatus.statusCode.ACTIVITY_GROUP_SIGN_UP_CLOSE.code) {
+        if (!activityGroup.status == ActivityGroupStatus.statusCode.ACTIVITY_GROUP_SIGN_UP_CLOSE.code) {
           return res.json({
             ret: -1,
             code: ErrorCode.ACTIVITY_GROUP_SIGN_UP_CLOSE.code,
@@ -108,7 +108,7 @@ exports.joinForMobile = function(req, res) {
           });
         } else {
           //如果当前时间大于报名截至时间则更新活动状态为: 3 - 已结束
-          if(new Date() > activityGroup.deadlineTime) {
+          if (new Date() > activityGroup.deadlineTime) {
             ActivityGroup.update({
               _id: activityGroup._id
             }, {
@@ -132,49 +132,76 @@ exports.joinForMobile = function(req, res) {
             });
           } else {
             //如果当前分组状态为报名中才可以报名
-            if(activityGroup.status == ActivityGroupStatus.statusCode.ACTIVITY_GROUP_SIGN_UP_ING.code) {
+            if (activityGroup.status == ActivityGroupStatus.statusCode.ACTIVITY_GROUP_SIGN_UP_ING.code) {
 
               //判断该分组报名人数是否已达上限 或者 numLimit ＝ 0 则为不限制人数
-              if(activityGroup.users.length < activityGroup.numLimit || activityGroup.numLimit == 0) {
-                activityGroup.users.push(user._id);
-                activityGroup.save(function(err) {
-                  if (err) {
-                    return res.json({
-                      ret: -1,
-                      code: ErrorCode.DATABASE_ERROR.code,
-                      msg: errorHandler.getErrorMessage(err)
+              if (activityGroup.users.length < activityGroup.numLimit || activityGroup.numLimit == 0) {
+                //如果是收费活动，则进入收费环节
+                if (activityGroup.entryFee && activityGroup.numLimit) {
+                  //判断是否已经加入该分组
+                  ActivityGroupOrder.canCreateOrder(activityGroup, user)
+                    .then(function(canCreateOrderResult) {
+                      //先锁定一个名额
+                      activityGroup.reservePlaces(1, user)
+                        .then(function(reservePlacesResult) {
+                          return res.json(reservePlacesResult);
+                        })
+                        .fail(function(reservePlacesErr) {
+                          return res.json(reservePlacesErr);
+                        });
+                    })
+                    .fail(function(canCreateOrderErr) {
+                      return res.json(canCreateOrderErr);
                     });
-                  } else {
-                    //加入活动发出通知逻辑(发送给自己)
-                    NotificationComponent.sendJoinActivityNotificationToSelf(req, res, activityGroup, user);
-                    //加入活动发出通知逻辑(发送给活动领队)
-                    NotificationComponent.sendJoinActivityNotificationToCaptain(req, res, activityGroup, user);
+                } else if (activityGroup.entryFee && !activityGroup.numLimit) {
+                  ActivityGroupOrder.createOrder(user, activityGroup)
+                    .then(function(createOrderResult) {
+                      return res.json(createOrderResult)
+                    })
+                    .fail(function(createOrderErr) {
+                      return res.json(createOrderErr)
+                    });
+                } else {
+                  activityGroup.users.push(user._id);
+                  activityGroup.save(function(err) {
+                    if (err) {
+                      return res.json({
+                        ret: -1,
+                        code: ErrorCode.DATABASE_ERROR.code,
+                        msg: errorHandler.getErrorMessage(err)
+                      });
+                    } else {
+                      //加入活动发出通知逻辑(发送给自己)
+                      NotificationComponent.sendJoinActivityNotificationToSelf(req, res, activityGroup, user);
+                      //加入活动发出通知逻辑(发送给活动领队)
+                      NotificationComponent.sendJoinActivityNotificationToCaptain(req, res, activityGroup, user);
 
-                    return res.json({
-                      ret: 1,
-                      code: ErrorCode.SUCCESS.code,
-                      msg: ErrorCode.SUCCESS.desc,
-                    });
-                  }
-                });
+                      return res.json({
+                        ret: 1,
+                        code: ErrorCode.SUCCESS.code,
+                        msg: ErrorCode.SUCCESS.desc,
+                      });
+                    }
+                  });
 
-                //更新与自己相关的活动
-                user.activities.push(activityGroup.activity);
-                User.update({
-                  _id: user._id
-                }, {
-                  $set: {
-                    activities: user.activities
-                  }
-                }, function(err) {
-                  if (err) {
-                    return res.json({
-                      ret: -1,
-                      code: ErrorCode.DATABASE_ERROR.code,
-                      msg: errorHandler.getErrorMessage(err)
-                    });
-                  };
-                });
+                  //更新与自己相关的活动
+                  user.activities.push(activityGroup.activity);
+                  User.update({
+                    _id: user._id
+                  }, {
+                    $set: {
+                      activities: user.activities
+                    }
+                  }, function(err) {
+                    if (err) {
+                      return res.json({
+                        ret: -1,
+                        code: ErrorCode.DATABASE_ERROR.code,
+                        msg: errorHandler.getErrorMessage(err)
+                      });
+                    };
+                  });
+                }
               } else {
                 //更新报名人数已满
                 ActivityGroup.update({
@@ -216,7 +243,7 @@ exports.joinForMobile = function(req, res) {
 
 exports.quitForMobile = function(req, res) {
   var token = req.body.token || req.query.token || req.headers['x-access-token'] || req.headers['authorization'];
-  if(token) {
+  if (token) {
     //先进行身份验证
     User.findOne({
       token: token
@@ -236,7 +263,7 @@ exports.quitForMobile = function(req, res) {
         });
       } else {
         var activityGroup = req.activityGroup;
-        if(activityGroup.users.indexOf(user._id) >= 0) {
+        if (activityGroup.users.indexOf(user._id) >= 0) {
           activityGroup.users = activityGroup.users.splice(activityGroup.users, activityGroup.users.indexOf(user._id));
           activityGroup.save(function(err) {
             if (err) {
@@ -255,7 +282,7 @@ exports.quitForMobile = function(req, res) {
           });
 
           //更新与自己相关的活动
-          if(user.activities.indexOf(activityGroup.activity) >= 0) {
+          if (user.activities.indexOf(activityGroup.activity) >= 0) {
             user.activities = user.activities.splice(user.activities, user.activities.indexOf(activityGroup.activity));
             User.update({
               _id: user._id
@@ -289,7 +316,7 @@ exports.quitForMobile = function(req, res) {
 exports.kickoutForMobile = function(req, res) {
   var member = JSON.parse(req.body.member);
   var token = req.body.token || req.query.token || req.headers['x-access-token'] || req.headers['authorization'];
-  if(token) {
+  if (token) {
     //先进行身份验证
     User.findOne({
       token: token
@@ -309,81 +336,81 @@ exports.kickoutForMobile = function(req, res) {
         });
       } else {
         Activity.findOne({
-          _id: member.activityId
-        })
-        .populate('captain', 'nickname')
-        .exec(function(err, activity) {
-          //判断是否为该活动的领队
-          if(!_.isEqual(activity.captain._id, user._id)) {
-            return res.json({
-              ret: -1,
-              code: ErrorCode.ACTIVITY_HAVA_NOT_CAPTAIN_PERMISSION.code,
-              msg: ErrorCode.ACTIVITY_HAVA_NOT_CAPTAIN_PERMISSION.desc
-            });
-          } else {
-            var activityGroup = req.activityGroup;
-            if(activityGroup.users.indexOf(member.userId) >= 0) {
-              activityGroup.users = activityGroup.users.splice(activityGroup.users, activityGroup.users.indexOf(member.userId));
-              activityGroup.save(function(err) {
-                if (err) {
-                  return res.json({
-                    ret: -1,
-                    code: ErrorCode.DATABASE_ERROR.code,
-                    msg: errorHandler.getErrorMessage(err)
-                  });
-                } else {
-                  //活动踢人发出通知逻辑(发送给自己)
-                  NotificationComponent.sendKickoutActivityNotificationToSelf(req, res, activityGroup, user, member);
-                  //活动踢人发出通知逻辑(发送给被踢人)
-                  NotificationComponent.sendKickoutActivityNotificationToMember(req, res, activityGroup, member);
-
-                  return res.json({
-                    ret: 1,
-                    code: ErrorCode.SUCCESS.code,
-                    msg: ErrorCode.SUCCESS.desc,
-                  });
-                }
-              });
-
-              //更新与自己相关的活动
-              User.findOne({
-                _id: member.userId
-              }).exec(function(err, member) {
-                if (err) {
-                  return res.json({
-                    ret: -1,
-                    code: ErrorCode.DATABASE_ERROR.code,
-                    msg: errorHandler.getErrorMessage(err)
-                  });
-                };
-                if(member.activities.indexOf(activityGroup.activity) >= 0) {
-                  member.activities = member.activities.splice(member.activities, member.activities.indexOf(activityGroup.activity));
-                  User.update({
-                    _id: member._id
-                  }, {
-                    $set: {
-                      activities: member.activities
-                    }
-                  }, function(err) {
-                    if (err) {
-                      return res.json({
-                        ret: -1,
-                        code: ErrorCode.DATABASE_ERROR.code,
-                        msg: errorHandler.getErrorMessage(err)
-                      });
-                    };
-                  });
-                };
-              });
-            } else {
+            _id: member.activityId
+          })
+          .populate('captain', 'nickname')
+          .exec(function(err, activity) {
+            //判断是否为该活动的领队
+            if (!_.isEqual(activity.captain._id, user._id)) {
               return res.json({
                 ret: -1,
-                code: ErrorCode.ACTIVITY_GROUP_ALREADY_QUIT.code,
-                msg: ErrorCode.ACTIVITY_GROUP_ALREADY_QUIT.desc
+                code: ErrorCode.ACTIVITY_HAVA_NOT_CAPTAIN_PERMISSION.code,
+                msg: ErrorCode.ACTIVITY_HAVA_NOT_CAPTAIN_PERMISSION.desc
               });
+            } else {
+              var activityGroup = req.activityGroup;
+              if (activityGroup.users.indexOf(member.userId) >= 0) {
+                activityGroup.users = activityGroup.users.splice(activityGroup.users, activityGroup.users.indexOf(member.userId));
+                activityGroup.save(function(err) {
+                  if (err) {
+                    return res.json({
+                      ret: -1,
+                      code: ErrorCode.DATABASE_ERROR.code,
+                      msg: errorHandler.getErrorMessage(err)
+                    });
+                  } else {
+                    //活动踢人发出通知逻辑(发送给自己)
+                    NotificationComponent.sendKickoutActivityNotificationToSelf(req, res, activityGroup, user, member);
+                    //活动踢人发出通知逻辑(发送给被踢人)
+                    NotificationComponent.sendKickoutActivityNotificationToMember(req, res, activityGroup, member);
+
+                    return res.json({
+                      ret: 1,
+                      code: ErrorCode.SUCCESS.code,
+                      msg: ErrorCode.SUCCESS.desc,
+                    });
+                  }
+                });
+
+                //更新与自己相关的活动
+                User.findOne({
+                  _id: member.userId
+                }).exec(function(err, member) {
+                  if (err) {
+                    return res.json({
+                      ret: -1,
+                      code: ErrorCode.DATABASE_ERROR.code,
+                      msg: errorHandler.getErrorMessage(err)
+                    });
+                  };
+                  if (member.activities.indexOf(activityGroup.activity) >= 0) {
+                    member.activities = member.activities.splice(member.activities, member.activities.indexOf(activityGroup.activity));
+                    User.update({
+                      _id: member._id
+                    }, {
+                      $set: {
+                        activities: member.activities
+                      }
+                    }, function(err) {
+                      if (err) {
+                        return res.json({
+                          ret: -1,
+                          code: ErrorCode.DATABASE_ERROR.code,
+                          msg: errorHandler.getErrorMessage(err)
+                        });
+                      };
+                    });
+                  };
+                });
+              } else {
+                return res.json({
+                  ret: -1,
+                  code: ErrorCode.ACTIVITY_GROUP_ALREADY_QUIT.code,
+                  msg: ErrorCode.ACTIVITY_GROUP_ALREADY_QUIT.desc
+                });
+              }
             }
-          }
-        });
+          });
       }
     });
   }
