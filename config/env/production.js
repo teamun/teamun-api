@@ -2,7 +2,7 @@
 
 module.exports = {
   secret: '123together',
-  db: 'mongodb://teamun:duibu2015@dds-bp1f78ff40e23c041.mongodb.rds.aliyuncs.com:3717/teamun',
+  db: 'mongodb://teamun:duibu2015@dds-bp1f78ff40e23c041.mongodb.rds.aliyuncs.com:3717,dds-bp1f78ff40e23c042.mongodb.rds.aliyuncs.com:3717/teamun',
   port: 3002,
   app: {
     title: 'teamun-api',
