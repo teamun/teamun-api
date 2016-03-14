@@ -136,72 +136,45 @@ exports.joinForMobile = function(req, res) {
 
               //判断该分组报名人数是否已达上限 或者 numLimit ＝ 0 则为不限制人数
               if (activityGroup.users.length < activityGroup.numLimit || activityGroup.numLimit == 0) {
-                //如果是收费活动，则进入收费环节
-                if (activityGroup.entryFee && activityGroup.numLimit) {
-                  //判断是否已经加入该分组
-                  ActivityGroupOrder.canCreateOrder(activityGroup, user)
-                    .then(function(canCreateOrderResult) {
-                      //先锁定一个名额
-                      activityGroup.reservePlaces(1, user)
-                        .then(function(reservePlacesResult) {
-                          return res.json(reservePlacesResult);
-                        })
-                        .fail(function(reservePlacesErr) {
-                          return res.json(reservePlacesErr);
-                        });
-                    })
-                    .fail(function(canCreateOrderErr) {
-                      return res.json(canCreateOrderErr);
+                activityGroup.users.push(user._id);
+                activityGroup.save(function(err) {
+                  if (err) {
+                    return res.json({
+                      ret: -1,
+                      code: ErrorCode.DATABASE_ERROR.code,
+                      msg: errorHandler.getErrorMessage(err)
                     });
-                } else if (activityGroup.entryFee && !activityGroup.numLimit) {
-                  ActivityGroupOrder.createOrder(user, activityGroup)
-                    .then(function(createOrderResult) {
-                      return res.json(createOrderResult)
-                    })
-                    .fail(function(createOrderErr) {
-                      return res.json(createOrderErr)
+                  } else {
+                    //加入活动发出通知逻辑(发送给自己)
+                    NotificationComponent.sendJoinActivityNotificationToSelf(req, res, activityGroup, user);
+                    //加入活动发出通知逻辑(发送给活动领队)
+                    NotificationComponent.sendJoinActivityNotificationToCaptain(req, res, activityGroup, user);
+
+                    return res.json({
+                      ret: 1,
+                      code: ErrorCode.SUCCESS.code,
+                      msg: ErrorCode.SUCCESS.desc,
                     });
-                } else {
-                  activityGroup.users.push(user._id);
-                  activityGroup.save(function(err) {
-                    if (err) {
-                      return res.json({
-                        ret: -1,
-                        code: ErrorCode.DATABASE_ERROR.code,
-                        msg: errorHandler.getErrorMessage(err)
-                      });
-                    } else {
-                      //加入活动发出通知逻辑(发送给自己)
-                      NotificationComponent.sendJoinActivityNotificationToSelf(req, res, activityGroup, user);
-                      //加入活动发出通知逻辑(发送给活动领队)
-                      NotificationComponent.sendJoinActivityNotificationToCaptain(req, res, activityGroup, user);
+                  }
+                });
 
-                      return res.json({
-                        ret: 1,
-                        code: ErrorCode.SUCCESS.code,
-                        msg: ErrorCode.SUCCESS.desc,
-                      });
-                    }
-                  });
-
-                  //更新与自己相关的活动
-                  user.activities.push(activityGroup.activity);
-                  User.update({
-                    _id: user._id
-                  }, {
-                    $set: {
-                      activities: user.activities
-                    }
-                  }, function(err) {
-                    if (err) {
-                      return res.json({
-                        ret: -1,
-                        code: ErrorCode.DATABASE_ERROR.code,
-                        msg: errorHandler.getErrorMessage(err)
-                      });
-                    };
-                  });
-                }
+                //更新与自己相关的活动
+                user.activities.push(activityGroup.activity);
+                User.update({
+                  _id: user._id
+                }, {
+                  $set: {
+                    activities: user.activities
+                  }
+                }, function(err) {
+                  if (err) {
+                    return res.json({
+                      ret: -1,
+                      code: ErrorCode.DATABASE_ERROR.code,
+                      msg: errorHandler.getErrorMessage(err)
+                    });
+                  };
+                });
               } else {
                 //更新报名人数已满
                 ActivityGroup.update({
